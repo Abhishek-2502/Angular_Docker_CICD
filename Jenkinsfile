@@ -18,6 +18,8 @@ pipeline {
             steps {
                 echo 'Pruning unused Docker resources before build...'
                 sh '''
+                    cd $APP_DIR
+
                     docker-compose down --remove-orphans --volumes || true
                                   
                     docker container prune -f || true
@@ -33,6 +35,7 @@ pipeline {
             steps {
                 echo 'Building and starting Docker containers...'
                 sh '''
+                    cd $APP_DIR
                     docker-compose build --no-cache
                     docker-compose up -d
                 '''
@@ -43,8 +46,10 @@ pipeline {
     post {
         always {
             echo 'Final container status:'
-            echo 'Final container status:'
-            sh 'docker-compose ps'
+            sh '''
+                cd $APP_DIR
+                docker-compose ps
+            '''
         }
         failure {
             echo 'Deployment failed. Please check the logs above.'
